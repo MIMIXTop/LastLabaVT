@@ -1,0 +1,26 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:18
+    container_name: nest_postgres
+    environment:
+      POSTGRES_USER: nestuser
+      POSTGRES_PASSWORD: nestpass
+      POSTGRES_DB: nestdb
+    ports: 
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql
+
+  app:
+    build: .
+    container_name: nest-app-opt
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://nestuser:nestpass@postgres:5432/nestdb
+    depends_on:
+      - postgres
+
+volumes:
+  pgdata:
