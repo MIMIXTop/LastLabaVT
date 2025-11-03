@@ -5,23 +5,11 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-and-deploy:
+  build-deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run build
-        run: npm run build
 
       - name: Build Docker image
         run: docker build -t mimixtop/nest-app:latest .
@@ -34,10 +22,3 @@ jobs:
 
       - name: Push Docker image
         run: docker push mimixtop/nest-app:latest
-
-      - name: Deploy to Heroku
-        uses: akhileshns/heroku-deploy@v3.12.12
-        with:
-          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-          heroku_app_name: "my-nest-app"
-          heroku_email: "maksvech812@gmail.com"

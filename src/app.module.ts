@@ -8,23 +8,32 @@ import { Task } from './tasks/entities/task.entity';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { Role } from './tasks/entities/role.entity';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'postgres',
-      port: 5432,
-      username: 'nestuser',
-      password: 'nestpass',
-      database: 'nestdb',
-      autoLoadEntities: true,
-      synchronize: true,
-      entities: [User, Task, Role],
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get<string>('DATABASE_HOST') || 'postgres',
+        port: parseInt(configService.get<string>('DATABASE_PORT') || '5432', 10),
+        username: configService.get<string>('DATABASE_USERNAME') || 'nestuser',
+        password: configService.get<string>('DATABASE_PASSWORD') || 'nestpass',
+        database: configService.get<string>('DATABASE_NAME') || 'nestdb',
+        autoLoadEntities: true,
+        synchronize: true,
+        entities: [User, Task, Role],
+      }),
     }),
     TasksModule,
     AuthModule,
-    UsersModule
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
